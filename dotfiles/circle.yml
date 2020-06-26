@@ -5,10 +5,10 @@ machine:
 dependencies:
   pre:
     - whoami
-    - sudo apt-get update && sudo apt-get install jq
-    - sudo apt-get install python-pip python-dev libffi-dev libssl-dev
-    - sudo pip install -U pip
-    - pip install awscli datadog
+    - sudo apt-get update && sudo apt-get installCli.sh jq
+    - sudo apt-get installCli.sh python-pip python-dev libffi-dev libssl-dev
+    - sudo pip installCli.sh -U pip
+    - pip installCli.sh awscli datadog
     - pip list
     - ./pre-ci.sh
 
