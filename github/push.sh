@@ -4,8 +4,8 @@ if [ $option == "push" ]
 then
   git add -A
   git status
-  read -p "feature, hotfix, doc, or bugFix" commitType
-  read -p "message" message
+  read -p "feature, hotfix, doc, or bugFix:" commitType
+  read -p "message:" message
   read -p "Check that the files changes are correct. [y/n]: " isCorrect
   if [ $isCorrect == "y" ]
   then
