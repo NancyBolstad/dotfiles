@@ -4,12 +4,13 @@ if [ $option == "push" ]
 then
   git add -A
   git status
+  read -p "feature, hotfix, doc, or bugFix" commitType
+  read -p "message" message
   read -p "Check that the files changes are correct. [y/n]: " isCorrect
   if [ $isCorrect == "y" ]
   then
-    git commit -m ":memo: Add some documents `date`"
-    git pull origin master
-    git push origin master
+    git commit -m "$commitType/$message"
+    git push
   else
     echo "It's not pushed"
   fi
