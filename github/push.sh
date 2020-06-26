@@ -1,7 +1,7 @@
 
 #!/bin/bash
-read -p "push or rebase: " oper
-if [ $oper == "push" ]
+read -p "push or rebase: " option
+if [ $option == "push" ]
 then
   git add -A
   git status
@@ -14,7 +14,8 @@ then
   else
     echo "It's not pushed"
   fi
-else
+elif [ $option == "rebase" ]
+  then
   git add -A
   git commit -m "rebase"
   git rebase -i HEAD~2
@@ -25,4 +26,6 @@ else
   else
     echo "It's not rebased"
   fi
-fi
+else
+  echo "Invalid attempt"
+  fi
