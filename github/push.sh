@@ -4,8 +4,8 @@ if [ $option == "push" ]
 then
   git add -A
   git status
-  read -p "Check that the files changes are correct. [y/n]: " variable
-  if [ $variable == "y" ]
+  read -p "Check that the files changes are correct. [y/n]: " isCorrect
+  if [ $isCorrect == "y" ]
   then
     git commit -m ":memo: Add some documents `date`"
     git pull origin master
@@ -18,8 +18,8 @@ elif [ $option == "rebase" ]
   git add -A
   git commit -m "rebase"
   git rebase -i HEAD~2
-  read -p "Modified to complete. [y/n]: " variable
-  if [ $variable == "y" ]
+  read -p "Modified to complete. [y/n]: " isCorrect
+  if [ $isCorrect == "y" ]
   then
     git push origin master -f
   else
