@@ -1,0 +1,24 @@
+machine:
+  python:
+    version: 2.7.12
+
+dependencies:
+  pre:
+    - whoami
+    - sudo apt-get update && sudo apt-get install jq
+    - sudo apt-get install python-pip python-dev libffi-dev libssl-dev
+    - sudo pip install -U pip
+    - pip install awscli datadog
+    - pip list
+    - ./pre-ci.sh
+
+test:
+  override:
+    - date
+    - sleep 10
+
+  post:
+    - printenv
+    - uptime
+    - date
+    - ./post-ci.sh
