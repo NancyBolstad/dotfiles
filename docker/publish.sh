@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Logs into ECR, then builds and pushes docker image. Docker
+# image is tagged with 7 character git commit SHA.
+#
+# Usage:
+#
+#   docker-publish
+
+
+set -e
+
+DIR=$(dirname "$0")
+. $DIR/utils
+
+# enable experimental cli features for 'docker manifest'
+if [ -f "~/.docker/config.json" ]; then
+    tmp=$(mktemp)
+    jq '. + {"experimental":"enabled"}' ~/.docker/config.json > "$tmp"
+    mv $tmp ~/.docker/config.json
+else
+    mkdir -p ~/.docker
+    echo '{"experimental":"enabled"}' > ~/.docker/config.json
+fi
+
+image_exists() {
+    docker manifest inspect "$1" > /dev/null
+    status=$?
+    if $(exit $status); then
+        true
+    else
+        false
+    fi
+}
+
+check_ecr_vars() {
+  # ECR required env vars
+  if [[ -z $ECR_ACCOUNT_ID ]]; then echo "Missing var for ECR: ECR_ACCOUNT_ID" && exit 1; fi
+  if [[ -z $ECR_PUSH_SECRET ]]; then echo "Missing var for ECR: ECR_PUSH_SECRET" && exit 1; fi
+}
+
+ecr_login(){
+  REGION=$1
+  eval $(AWS_ACCESS_KEY_ID=$2 AWS_SECRET_ACCESS_KEY=$3 aws ecr --region $REGION get-login --include-email) || eval $(AWS_ACCESS_KEY_ID=$2 AWS_SECRET_ACCESS_KEY=$3 aws ecr --region $REGION get-login --no-include-email)
+}
+
+push_ecr_image(){
+  REGION=$1
+  ECR_URI=$ECR_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO:$SHORT_SHA
+  if image_exists $ECR_URI > /dev/null; then
+      echo "ECR image exists, refusing to overwrite"
+      return
+  fi
+  docker tag $ORG/$REPO:$SHORT_SHA $ECR_URI
+  docker push $ECR_URI
+}
+
+# Set automatically by CircleCI
+: ${CIRCLE_PROJECT_REPONAME?"Missing required env var"}
+REPO=$CIRCLE_PROJECT_REPONAME
+: ${CIRCLE_SHA1?"Missing required env var"}
+SHORT_SHA=${CIRCLE_SHA1:0:7}
+
+ORG=clever
+
+ECR_REGION_PRIMARY=us-west-1
+ECR_REGION_SECONDARY=us-west-2
+
+echo "Docker version..."
+docker version
+
+# Check CLI + env vars for ECR
+check_ecr_vars
+
+install_awscli
+
+# Some Dockerfiles for private repos depend on public images (and vice versa) in us-west-1
+echo "If necessary, add the ECR_BUILD_ID and ECR_BUILD_SECRET env vars to circle manually."
+echo "They can be found in init-service as CI_ECR_XXX_KEY and CI_ECR_XXX_SECRET."
+if [[ -n $ECR_BUILD_ID ]]; then
+  ecr_login us-west-1 $ECR_BUILD_ID $ECR_BUILD_SECRET
+fi
+echo "Building docker image..."
+docker build -t $ORG/$REPO:$SHORT_SHA .
+
+# ECR login.
+echo "Logging into ECR..."
+ecr_login $ECR_REGION_PRIMARY $ECR_PUSH_ID $ECR_PUSH_SECRET
+ecr_login $ECR_REGION_SECONDARY $ECR_PUSH_ID $ECR_PUSH_SECRET
+
+echo "Pushing to ECR..."
+push_ecr_image $ECR_REGION_PRIMARY
+push_ecr_image $ECR_REGION_SECONDARY
