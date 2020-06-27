@@ -1,0 +1,11 @@
+alias ..="cd .."
+alias cd..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+alias -- -="cd -"
+
+alias dl="cd ~/Downloads"
+alias dev="cd ~/dev"
+alias repo="cd ~/repo"
+alias browser-sync="browser-sync --server --watch"
