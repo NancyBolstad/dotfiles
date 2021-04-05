@@ -1,7 +1,25 @@
   
 {
-    "editor.formatOnSave": true,
-    "files.associations": {
-      "*.json": "jsonc"
-    }
-  }
+  "editor.formatOnSave": true,
+  "files.autoSave": "onFocusChange",
+  "files.insertFinalNewline": true,
+  "files.associations": {
+    "*.json": "jsonc"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/.cache": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.docz": true
+  },
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all"
+}
